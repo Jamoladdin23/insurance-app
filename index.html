@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>PojištěníApp</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+    }
+
+    header {
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    nav a {
+      margin-right: 15px;
+      text-decoration: none;
+      color: #3498db;
+      font-weight: bold;
+    }
+
+    .main-content {
+      display: flex;
+      gap: 50px;
+      align-items: flex-start;
+    }
+
+    .table-section {
+      flex: 2;
+    }
+
+    .form-section {
+      flex: 1;
+      max-width: 300px;
+      background-color: #fff;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #fff;
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input {
+      margin-top: 5px;
+      padding: 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 8px 12px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>PojištěníApp</h1>
+    <nav>
+      <a href="#">Pojištěnci</a>
+      <a href="#">O aplikaci...</a>
+    </nav>
+  </header>
+
+  <div class="main-content">
+    <div class="table-section">
+      <h2>Pojištěnci</h2>
+      <table id="insuredTable">
+        <thead>
+          <tr>
+            <th>Jméno a příjmení</th>
+            <th>Telefon</th>
+            <th>Věk</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="form-section">
+      <h2>Nový pojištěnec</h2>
+      <form id="insuredForm">
+        <label>Jméno:</label>
+        <input type="text" name="firstName" required>
+        <label>Příjmení:</label>
+        <input type="text" name="lastName" required>
+        <label>Věk:</label>
+        <input type="number" name="age" required>
+        <label>Telefon:</label>
+        <input type="text" name="phone" required>
+        <button type="submit">Uložit</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api/insured';
+
+    async function loadInsured() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        const tbody = document.querySelector('#insuredTable tbody');
+        tbody.innerHTML = '';
+        data.forEach(person => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${person.firstName} ${person.lastName}</td>
+            <td>${person.phone}</td>
+            <td>${person.age}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (err) {
+        console.error('Chyba při načítání dat:', err);
+      }
+    }
+
+    document.getElementById('insuredForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const payload = {
+        firstName: form.firstName.value,
+        lastName: form.lastName.value,
+        age: parseInt(form.age.value),
+        phone: form.phone.value
+      };
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        form.reset();
+        loadInsured();
+      } catch (err) {
+        console.error('Chyba při ukládání:', err);
+      }
+    });
+
+    loadInsured();
+  </script>
+
+</body>
+</html>
